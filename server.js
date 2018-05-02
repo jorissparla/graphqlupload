@@ -16,10 +16,10 @@ db.defaults({ uploads: [] }).write();
 // Ensure upload directory exists
 mkdirp.sync(uploadDir);
 
-const storeUpload = async ({ stream, filename }) => {
+const storeUpload = async ({ stream, filename, folder = uploadDir }) => {
   const id = shortid.generate();
-  const path = `${uploadDir}/${id}-${filename}`;
-
+  const path = `${folder}/${id}-${filename}`;
+  await fs.mkdir(folder, () => console.log(`folder ${folder} was created`));
   return new Promise((resolve, reject) =>
     stream
       .pipe(createWriteStream(path))
@@ -35,9 +35,9 @@ const recordFile = file =>
     .last()
     .write();
 
-const processUpload = async upload => {
+const processUpload = async (upload, folder = uploadDir) => {
   const { stream, filename, mimetype, encoding } = await upload;
-  const { id, path } = await storeUpload({ stream, filename });
+  const { id, path } = await storeUpload({ stream, filename, folder });
   return recordFile({ id, filename, mimetype, encoding, path });
 };
 
@@ -58,8 +58,8 @@ type File {
 
 type Mutation {
   createFolder(name: String!): String!
-  singleUpload (file: Upload!): File!
-    multipleUpload (files: [Upload!]!): [File!]!
+  singleUpload (file: Upload!, folder: String): File!
+    multipleUpload (files: [Upload!]!, folder:String): [File!]!
 
 }
 `;
@@ -72,13 +72,13 @@ const resolvers = {
   Mutation: {
     createFolder: name => {
       fs.mkdir('test', () => {
-        console.log(`${name} was created`);
         return 'Ja';
       });
       return 'Ja';
     },
-    singleUpload: (obj, { file }) => processUpload(file),
-    multipleUpload: (obj, { files }) => Promise.all(files.map(processUpload))
+    singleUpload: (obj, { folder, file }) => processUpload(file, folder),
+    multipleUpload: (obj, { folder, files }) =>
+      Promise.all(files.map(file => processUpload(file, folder)))
   }
 };
 

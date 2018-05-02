@@ -8,24 +8,32 @@ const App = () => {
       {(mutation, { data }) => {
         console.log('DATA', data);
         return (
-          <div className="upload-btn-wrapper">
-            <button className="btn">Upload a file</button>
-            <input
-              type="file"
-              multiple
-              required
-              onChange={({ target: { validity, files } }) =>
-                validity.valid &&
-                mutation({
-                  variables: { files },
-                  update: (proxy, { data: { multipleUpload } }) => {
+          <div>
+            <input type="text" className="btn" />
+            <div className="upload-btn-wrapper">
+              <button className="btn">Upload a file</button>
+              <input
+                type="file"
+                multiple
+                required
+                onChange={({ target: { validity, files } }) =>
+                  validity.valid &&
+                  mutation({
+                    variables: { files, folder: './xyz' }
+                    /*                   update: (proxy, { data: { multipleUpload } }) => {
                     const data = proxy.readQuery({ query: UPLOADS_QUERY });
                     data.uploads.push(...multipleUpload);
                     proxy.writeQuery({ query: UPLOADS_QUERY, data });
-                  }
-                })
-              }
-            />
+                  } */
+                  })
+                }
+              />
+            </div>
+            <div>
+              {data && (
+                <ul>{data.multipleUpload.map(item => <li key={item.id}>{item.filename}</li>)}</ul>
+              )}
+            </div>
           </div>
         );
       }}
@@ -46,10 +54,18 @@ const UPLOADS_QUERY = gql`
 `;
 
 const UPLOAD_MUTATION = gql`
-  mutation($files: [Upload!]!) {
-    multipleUpload(files: $files) {
+  mutation($files: [Upload!]!, $folder: String) {
+    multipleUpload(files: $files, folder: $folder) {
       id
+      path
+      filename
     }
+  }
+`;
+
+const CREATE_FOLDER_MUTATION = gql`
+  mutation($name: String) {
+    createFolder(name: $name)
   }
 `;
 export default App;
