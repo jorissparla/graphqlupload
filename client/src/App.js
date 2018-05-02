@@ -40,7 +40,7 @@ const App = () => {
     </Mutation>
   );
 };
-
+//test
 const UPLOADS_QUERY = gql`
   query uploads {
     uploads {
