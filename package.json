@@ -10,6 +10,7 @@
   "author": "Joris Sparla <joris.sparla@gmail.com>",
   "license": "ISC",
   "dependencies": {
+    "express": "^4.16.3",
     "graphql-yoga": "^1.13.1",
     "lowdb": "^1.0.0",
     "mkdirp": "^0.5.1",

@@ -6,12 +6,14 @@ const mkdirp = require('mkdirp');
 const shortid = require('shortid');
 const lowdb = require('lowdb');
 const FileSync = require('lowdb/adapters/FileSync');
+const express = require('express');
+const server2 = express();
 
 const uploadDir = './uploads';
-const db = new lowdb(new FileSync('db.json'));
+//const db = new lowdb(new FileSync('db.json'));
 
 // Seed an empty DB
-db.defaults({ uploads: [] }).write();
+//db.defaults({ uploads: [] }).write();
 
 // Ensure upload directory exists
 mkdirp.sync(uploadDir);
@@ -28,16 +30,18 @@ const storeUpload = async ({ stream, filename, folder = uploadDir }) => {
   );
 };
 
-const recordFile = file =>
+const recordFile = file => file;
+/* const recordFile = file =>
   db
     .get('uploads')
     .push(file)
     .last()
     .write();
-
+ */
 const processUpload = async (upload, folder = uploadDir) => {
   const { stream, filename, mimetype, encoding } = await upload;
   const { id, path } = await storeUpload({ stream, filename, folder });
+  //return recordFile({ id, filename, mimetype, encoding, path });
   return recordFile({ id, filename, mimetype, encoding, path });
 };
 
@@ -45,7 +49,7 @@ const processUpload = async (upload, folder = uploadDir) => {
 const typeDefs = `
 scalar Upload
 type Query {
-  info: String!
+  info(text: String): String!
 }
 
 type File {
@@ -67,11 +71,12 @@ type Mutation {
 // 2
 const resolvers = {
   Query: {
-    info: () => `This is the API of a Hackernews Clone`
+    info: (obj, { text }) => `This is the API of a Hackernews Clone ${text}`
   },
   Mutation: {
-    createFolder: name => {
-      fs.mkdir('test', () => {
+    createFolder: (object, { name }) => {
+      console.log('NAME', name);
+      fs.mkdir(name, () => {
         return 'Ja';
       });
       return 'Ja';
@@ -87,4 +92,8 @@ const server = new GraphQLServer({
   typeDefs,
   resolvers
 });
+
+server2.get('/', (req, res) => res.send('Endpoint'));
+
+server2.listen(3333, () => console.log('API server running on port 3333'));
 server.start(() => console.log(`Server is running on http://localhost:4000`));

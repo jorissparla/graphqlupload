@@ -6,7 +6,8 @@ import { createUploadLink } from 'apollo-upload-client';
 import { ApolloProvider } from 'react-apollo';
 import App from './App';
 
-const link = createUploadLink({ uri: 'http://localhost:4000' });
+//const link = createUploadLink({ uri: 'http://localhost:4000' });
+const link = createUploadLink({ uri: 'http://localhost:55555/graphiql' });
 // Pass your GraphQL endpoint to uri
 //const client = new ApolloClient(createUploadLink({ uri: 'http://localhost:4000' }));
 const client = new ApolloClient({
